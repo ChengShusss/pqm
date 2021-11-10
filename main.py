@@ -4,7 +4,7 @@ Description:
 
 Author: Cheng Shu
 Date: 2021-11-09 21:32:15
-LastEditTime: 2021-11-09 23:49:19
+LastEditTime: 2021-11-10 10:03:04
 LastEditors: Cheng Shu
 @Copyright © 2020 Cheng Shu
 License: MIT License
@@ -13,7 +13,6 @@ import sys
 from PyQt5 import QtCore, QtWidgets
 
 import matplotlib
-matplotlib.use('Qt5Agg')
 # 使用 matplotlib中的FigureCanvas (在使用 Qt5 Backends中 FigureCanvas继承自QtWidgets.QWidget)
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
@@ -24,6 +23,8 @@ from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox
 # from dialog import Ui_Dialog
 from mainWindow import Ui_MainWindow
 import numpy as np
+
+matplotlib.use('Qt5Agg')
 
 
 class MyMatplotlibFigure(FigureCanvas):
@@ -53,6 +54,8 @@ class MyDesiger(QMainWindow, Ui_MainWindow):
         self.hboxlayout = QtWidgets.QHBoxLayout(self.label)
         self.hboxlayout.addWidget(self.canvas)
 
+        self.scan()
+
     def scan(self):
         """
         扫描端口，更新列表
@@ -70,6 +73,7 @@ class MyDesiger(QMainWindow, Ui_MainWindow):
                 name = port.name
                 desc = port.description[:port.description.find(' ')]
                 ports.append([name, desc])
+            print(ports)
             # 更新列表数据
             texts = [x[0] for x in ports]
             self.box_ports.addItems(texts)
@@ -83,6 +87,21 @@ class MyDesiger(QMainWindow, Ui_MainWindow):
         s = np.cos(2 * np.pi * t)
         self.canvas.axes.plot(t, s)
         self.canvas.figs.suptitle("sin")  # 设置标题
+    
+    def closeEvent(self, event):
+        """
+        我们创建了一个消息框，上面有俩按钮：Yes和No.第一个字符串显示在消息框的标题栏，第二个字符串显示在对话框，
+        第三个参数是消息框的俩按钮，最后一个参数是默认按钮，这个按钮是默认选中的。返回值在变量reply里。
+        """
+        
+        reply = QMessageBox.question(self, 'Message',"Are you sure to quit?",
+                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        # 判断返回值，如果点击的是Yes按钮，我们就关闭组件和应用，否则就忽略关闭事件
+        if reply == QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
+        
         
 
 if __name__ == "__main__":
